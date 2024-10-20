@@ -16,12 +16,16 @@ jobs:
           node-version: "18" # Change this to your Node.js version
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          # Navigate to the src directory and install dependencies
+          cd src
+          npm install
 
       - name: Start Express server
         run: |
           # Start the server in the background
-          nohup npm start &
+          cd src
+          nohup node main.js &
 
       - name: Wait for the server to start
         run: |
