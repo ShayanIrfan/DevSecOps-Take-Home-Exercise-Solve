@@ -209,7 +209,7 @@ const detectDriftRoute2 = (db) => async (req, res) => {
 // Inject dependencies into routes
 app.post("/release", authenticateAPIKey, createReleaseRoute(db));
 app.get("/releases", listReleasesRoute(db));
-app.get("/drift", detectDriftRoute2(db));
+app.get("/drift", detectDriftRoute(db));
 
 // Start the server
 app.listen(port, () => {
