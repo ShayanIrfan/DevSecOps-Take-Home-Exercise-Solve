@@ -1,0 +1,34 @@
+name: Run Express App Locally and Call /drift API
+
+on: [push]
+
+jobs:
+  run-express-app:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18" # Change this to your Node.js version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start Express server
+        run: |
+          # Start the server in the background
+          nohup npm start &
+
+      - name: Wait for the server to start
+        run: |
+          # Wait for a few seconds to ensure the server is up
+          sleep 10
+
+      - name: Call /drift API
+        run: |
+          # Replace with your API endpoint if needed
+          curl -X GET http://localhost:3000/drift
