@@ -1,7 +1,7 @@
 const express = require("express");
 const mysql = require("mysql2");
 const bodyParser = require("body-parser");
-const semver = require('semver');
+const semver = require("semver");
 const CreateRelease = require("./models/CreateRelease.js");
 const ListReleases = require("./models/ListReleases.js");
 const { authenticateAPIKey } = require("./middleware/authentication.js");
@@ -111,7 +111,7 @@ const detectDriftRoute = (db) => async (req, res) => {
         console.error("Failed to fetch releases:", err);
         remainingQueries -= 1;
         if (remainingQueries === 0 && driftReports.length === 0) {
-          res.send("No drift detected. Everything is up to date.");
+          res.status(404).json({ error: "No drift detected" });
         }
         return;
       }
@@ -195,16 +195,13 @@ const detectDriftRoute = (db) => async (req, res) => {
       if (remainingQueries === 0) {
         if (driftReports.length > 0) {
           res.json(driftReports);
+          res.status(200).json(driftReports);
         } else {
-          res.send("No drift detected. Everything is up to date.");
+          res.status(404).json({ error: "No drift detected" });
         }
       }
     });
   });
-};
-
-const detectDriftRoute2 = (db) => async (req, res) => {
-  res.json({ check: "hello world" });
 };
 
 // Inject dependencies into routes
