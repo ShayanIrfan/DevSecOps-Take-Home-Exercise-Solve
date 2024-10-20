@@ -22,6 +22,11 @@ jobs:
           npm install
 
       - name: Start Express server
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
         run: |
           # Start the server in the background
           cd src

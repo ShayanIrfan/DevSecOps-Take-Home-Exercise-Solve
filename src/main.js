@@ -1,6 +1,7 @@
 const express = require("express");
 const mysql = require("mysql2");
 const bodyParser = require("body-parser");
+const semver = require('semver');
 const CreateRelease = require("./models/CreateRelease.js");
 const ListReleases = require("./models/ListReleases.js");
 const { authenticateAPIKey } = require("./middleware/authentication.js");
