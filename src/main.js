@@ -194,7 +194,6 @@ const detectDriftRoute = (db) => async (req, res) => {
       remainingQueries -= 1;
       if (remainingQueries === 0) {
         if (driftReports.length > 0) {
-          res.json(driftReports);
           res.status(200).json(driftReports);
         } else {
           res.status(404).json({ error: "No drift detected" });
