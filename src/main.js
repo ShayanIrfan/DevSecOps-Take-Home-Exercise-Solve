@@ -54,12 +54,10 @@ const createReleaseRoute = (db) => (req, res) => {
         console.error("Error inserting release:", err);
         return res.status(500).json({ error: "Failed to create release." });
       }
-      res
-        .status(201)
-        .json({
-          message: "Release created successfully.",
-          releaseId: result.insertId,
-        });
+      res.status(201).json({
+        message: "Release created successfully.",
+        releaseId: result.insertId,
+      });
     }
   );
 };
@@ -106,115 +104,111 @@ const detectDriftRoute = (db) => async (req, res) => {
     const environmentMap = {};
 
     // Create a map to track which versions are deployed in which environments
-    db.query(
-      "SELECT * FROM releases WHERE name = ?",
-      [app],
-      (err, results) => {
-        if (err) {
-          console.error("Failed to fetch releases:", err);
-          remainingQueries -= 1;
-          if (remainingQueries === 0 && driftReports.length === 0) {
-            res.send("No drift detected. Everything is up to date.");
-          }
-          return;
-        }
-
-        // Populate versionMap with the deployments across environments
-        results.forEach((release) => {
-          const versionKey = {
-            account: release.account,
-            region: release.region,
-          };
-          if (!versionMap[release.version]) {
-            versionMap[release.version] = [];
-          }
-          versionMap[release.version].push(versionKey);
-
-          // Populate environmentMap with the current deployed version for each environment
-          const envKey = `${release.account}_${release.region}`;
-          environmentMap[envKey] = release.version;
-        });
-
-        // Define the expected environments dynamically
-        const accounts = [
-          "staging",
-          "prod_one",
-          "prod_two",
-          "prod_three",
-          "prod_four",
-          "prod_five",
-        ];
-        const regions = ["primary", "secondary"];
-        const expectedEnvironments = [];
-
-        accounts.forEach((account) => {
-          regions.forEach((region) => {
-            expectedEnvironments.push({ account, region });
-          });
-        });
-
-        // Determine the latest version using semantic versioning
-        let currentLatestVersion = null;
-        Object.keys(versionMap).forEach((version) => {
-          if (
-            !currentLatestVersion ||
-            semver.gt(version, currentLatestVersion)
-          ) {
-            currentLatestVersion = version;
-          }
-        });
-
-        // Check if any environment is missing the latest version
-        const latestVersionEnvironments =
-          versionMap[currentLatestVersion] || [];
-        const driftDetails = {};
-
-        expectedEnvironments.forEach((expectedEnv) => {
-          const deployedEnv = latestVersionEnvironments.find(
-            (env) =>
-              env.account === expectedEnv.account &&
-              env.region === expectedEnv.region
-          );
-
-          if (!deployedEnv) {
-            if (!driftDetails[expectedEnv.account]) {
-              driftDetails[expectedEnv.account] = {};
-            }
-            const envKey = `${expectedEnv.account}_${expectedEnv.region}`;
-            const currentVersion = environmentMap[envKey] || "none";
-            driftDetails[expectedEnv.account][expectedEnv.region] =
-              currentVersion;
-          }
-        });
-
-        // Add drift information if there are any missing environments
-        if (Object.keys(driftDetails).length > 0) {
-          driftReports.push({
-            [app]: {
-              latest: currentLatestVersion,
-              drift: driftDetails,
-            },
-          });
-        }
-
-        // Respond once all queries have completed
+    db.query("SELECT * FROM releases WHERE name = ?", [app], (err, results) => {
+      if (err) {
+        console.error("Failed to fetch releases:", err);
         remainingQueries -= 1;
-        if (remainingQueries === 0) {
-          if (driftReports.length > 0) {
-            res.json(driftReports);
-          } else {
-            res.send("No drift detected. Everything is up to date.");
+        if (remainingQueries === 0 && driftReports.length === 0) {
+          res.send("No drift detected. Everything is up to date.");
+        }
+        return;
+      }
+
+      // Populate versionMap with the deployments across environments
+      results.forEach((release) => {
+        const versionKey = {
+          account: release.account,
+          region: release.region,
+        };
+        if (!versionMap[release.version]) {
+          versionMap[release.version] = [];
+        }
+        versionMap[release.version].push(versionKey);
+
+        // Populate environmentMap with the current deployed version for each environment
+        const envKey = `${release.account}_${release.region}`;
+        environmentMap[envKey] = release.version;
+      });
+
+      // Define the expected environments dynamically
+      const accounts = [
+        "staging",
+        "prod_one",
+        "prod_two",
+        "prod_three",
+        "prod_four",
+        "prod_five",
+      ];
+      const regions = ["primary", "secondary"];
+      const expectedEnvironments = [];
+
+      accounts.forEach((account) => {
+        regions.forEach((region) => {
+          expectedEnvironments.push({ account, region });
+        });
+      });
+
+      // Determine the latest version using semantic versioning
+      let currentLatestVersion = null;
+      Object.keys(versionMap).forEach((version) => {
+        if (!currentLatestVersion || semver.gt(version, currentLatestVersion)) {
+          currentLatestVersion = version;
+        }
+      });
+
+      // Check if any environment is missing the latest version
+      const latestVersionEnvironments = versionMap[currentLatestVersion] || [];
+      const driftDetails = {};
+
+      expectedEnvironments.forEach((expectedEnv) => {
+        const deployedEnv = latestVersionEnvironments.find(
+          (env) =>
+            env.account === expectedEnv.account &&
+            env.region === expectedEnv.region
+        );
+
+        if (!deployedEnv) {
+          if (!driftDetails[expectedEnv.account]) {
+            driftDetails[expectedEnv.account] = {};
           }
+          const envKey = `${expectedEnv.account}_${expectedEnv.region}`;
+          const currentVersion = environmentMap[envKey] || "none";
+          driftDetails[expectedEnv.account][expectedEnv.region] =
+            currentVersion;
+        }
+      });
+
+      // Add drift information if there are any missing environments
+      if (Object.keys(driftDetails).length > 0) {
+        driftReports.push({
+          [app]: {
+            latest: currentLatestVersion,
+            drift: driftDetails,
+          },
+        });
+      }
+
+      // Respond once all queries have completed
+      remainingQueries -= 1;
+      if (remainingQueries === 0) {
+        if (driftReports.length > 0) {
+          res.json(driftReports);
+        } else {
+          res.send("No drift detected. Everything is up to date.");
         }
       }
-    );
+    });
   });
+};
+
+const detectDriftRoute2 = (db) => async (req, res) => {
+  res.json({ check: "hello world" });
 };
 
 // Inject dependencies into routes
 app.post("/release", authenticateAPIKey, createReleaseRoute(db));
 app.get("/releases", listReleasesRoute(db));
-app.get("/drift", detectDriftRoute(db));
+app.get("/drift", detectDriftRoute2(db));
 
 // Start the server
 app.listen(port, () => {
