@@ -5,7 +5,7 @@ FROM node:18
 WORKDIR /src
 
 # Copying the environment file into /src
-COPY .env ./
+# COPY .env ./
 
 # Copy package.json and package-lock.json
 COPY src/package*.json ./
