@@ -110,7 +110,9 @@ const detectDriftRoute = (db) => async (req, res) => {
         console.error("Failed to fetch releases:", err);
         remainingQueries -= 1;
         if (remainingQueries === 0 && driftReports.length === 0) {
-          res.status(404).json({ error: "No drift detected" });
+          res
+            .status(404)
+            .json({ error: "No drift detected", db_host: process.env.DB_HOST });
         }
         return;
       }
@@ -193,9 +195,13 @@ const detectDriftRoute = (db) => async (req, res) => {
       remainingQueries -= 1;
       if (remainingQueries === 0) {
         if (driftReports.length > 0) {
-          res.status(200).json(driftReports);
+          res
+            .status(200)
+            .json({ ...driftReports, db_host: process.env.DB_HOST });
         } else {
-          res.status(404).json({ error: "No drift detected" });
+          res
+            .status(404)
+            .json({ error: "No drift detected", db_host: process.env.DB_HOST });
         }
       }
     });
