@@ -15,10 +15,10 @@ app.use(bodyParser.json());
 
 // MySQL database connection
 const db = mysql.createConnection({
-  host: process.env.DB_HOST || "mysql_db",
-  user: process.env.DB_USER || "sql_user",
-  password: process.env.DB_PASSWORD || "sqltestpass",
-  database: process.env.DB_DATABASE || "releases_db",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
 });
 
 // Connect to the database

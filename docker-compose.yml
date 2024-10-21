@@ -9,10 +9,10 @@ services:
     ports:
       - 3306:3306
     environment:
-      - MYSQL_DATABASE=releases_db
-      - MYSQL_USER=sql_user
-      - MYSQL_PASSWORD=sqltestpass
-      - MYSQL_ROOT_PASSWORD=sqltestpass
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
     networks:
       - internalnet
     healthcheck:
