@@ -16,9 +16,6 @@ RUN npm install
 # Copy the rest of your app's source code
 COPY src ./
 
-# Install MySQL client
-RUN apk add --no-cache mysql-client
-
 # Expose the app's port (3000 by default)
 EXPOSE 3000
 
