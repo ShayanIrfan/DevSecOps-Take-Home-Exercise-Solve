@@ -5,7 +5,7 @@ FROM node:18
 WORKDIR /src
 
 # Copying the environment file into /src
-COPY src/.env ./
+COPY .env ./
 
 # Copy package.json and package-lock.json
 COPY src/package*.json ./
@@ -14,7 +14,7 @@ COPY src/package*.json ./
 RUN npm install
 
 # Copy the rest of your app's source code
-COPY src ./src
+COPY src ./
 
 # Install MySQL client
 RUN apk add --no-cache mysql-client
@@ -23,4 +23,4 @@ RUN apk add --no-cache mysql-client
 EXPOSE 3000
 
 # Run the application
-CMD ["node", "./src/main.js"]
+CMD ["node", "main.js"]
