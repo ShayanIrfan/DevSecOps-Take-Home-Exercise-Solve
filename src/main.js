@@ -195,9 +195,7 @@ const detectDriftRoute = (db) => async (req, res) => {
         if (driftReports.length > 0) {
           res.status(200).json(driftReports);
         } else {
-          res
-            .status(404)
-            .json({ error: "No drift detected", db_host: process.env.DB_HOST });
+          res.status(404).json({ error: "No drift detected" });
         }
       }
     });
